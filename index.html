@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SMATR</title>
+    <style>
+      body {
+        background-color: green;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SMATR</h1>
+    <button id="camera1">Camera 1</button>
+    <button id="camera2">Camera 2</button>
+
+    <script>
+      document.getElementById('camera1').addEventListener('click', () => {
+        showOptions('Camera 1');
+      });
+
+      document.getElementById('camera2').addEventListener('click', () => {
+        showOptions('Camera 2');
+      });
+
+      function showOptions(camera) {
+        document.body.innerHTML = `
+          <h1>${camera}</h1>
+          <button id="attendance">Attendance</button>
+          <button id="attentiveness">Attentiveness</button>
+        `;
+
+        document.getElementById('attendance').addEventListener('click', () => {
+          showResult('Attendance', '80%');
+        });
+
+        document.getElementById('attentiveness').addEventListener('click', () => {
+          showResult('Attentiveness', '40%');
+        });
+      }
+
+      function showResult(option, result) {
+        document.body.innerHTML = `
+          <h1>${option}</h1>
+          <p>${result}</p>
+        `;
+      }
+    </script>
+  </body>
+</html>
