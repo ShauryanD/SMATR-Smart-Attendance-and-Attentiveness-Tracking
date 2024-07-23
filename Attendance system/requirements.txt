@@ -1,0 +1,6 @@
+Flask
+requests
+opencv-python
+face-recognition
+Pillow
+numpy==1.26.4
