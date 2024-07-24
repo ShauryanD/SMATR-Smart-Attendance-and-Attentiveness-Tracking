@@ -65,92 +65,262 @@
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>SMATR</title>
-    <style>
-      body {
-        background-color: green;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-        font-family: Arial, sans-serif;
-      }
-      button {
-        margin: 10px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-      th, td {
-        border: 1px solid white;
-        padding: 10px;
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>SMATR</h1>
-    <button id="camera1">Camera 1</button>
-    <button id="camera2">Camera 2</button>
+<head>
+  <title>SMATR</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    body {
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+    }
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: #ffeb3b;
+      position: relative;
+    }
+    .header-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .home-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      top: 40px;
+      right: 20px;
+    }
+    .home-button img {
+      width: 30px;
+      height: 30px;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-grow: 1;
+    }
+    button {
+      background-color: #ff6f61;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #ff4b4b;
+    }
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #fff;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .back-button {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .camera-icon {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
+    <button class="home-button" id="home">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
+    </button>
+  </header>
+  <main>
+    <h2>Select the Camera</h2>
+    <button id="camera1">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/camera--v1.png" class="camera-icon" alt="Camera 1"/>
+      Camera 1
+    </button>
+    <button id="camera2">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/camera--v1.png" class="camera-icon" alt="Camera 2"/>
+      Camera 2
+    </button>
+  </main>
+  <button class="back-button" id="back" style="display: none;">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
+  </button>
 
-    <script>
-      document.getElementById('camera1').addEventListener('click', () => {
-        showOptions('Camera 1');
+  <script>
+    const initialContent = document.body.innerHTML;
+
+    function updateContent(content, title) {
+      document.body.innerHTML = content;
+      document.title = title;
+      document.getElementById('home').addEventListener('click', () => {
+        location.reload();
       });
-
-      document.getElementById('camera2').addEventListener('click', () => {
-        showOptions('Camera 2');
+      document.getElementById('back').addEventListener('click', () => {
+        history.back();
       });
+      window.history.pushState({content: content, title: title}, title);
+    }
 
-      function showOptions(camera) {
-        document.body.innerHTML = `
-          <h1>${camera}</h1>
+    window.addEventListener('popstate', (event) => {
+      if (event.state) {
+        document.body.innerHTML = event.state.content;
+        document.title = event.state.title;
+        document.getElementById('home').addEventListener('click', () => {
+          location.reload();
+        });
+        document.getElementById('back').addEventListener('click', () => {
+          history.back();
+        });
+      } else {
+        document.body.innerHTML = initialContent;
+        document.title = 'SMATR';
+        document.getElementById('home').addEventListener('click', () => {
+          location.reload();
+        });
+        document.getElementById('camera1').addEventListener('click', () => {
+          showOptions('Camera 1');
+        });
+        document.getElementById('camera2').addEventListener('click', () => {
+          showOptions('Camera 2');
+        });
+      }
+    });
+
+    document.getElementById('camera1').addEventListener('click', () => {
+      showOptions('Camera 1');
+    });
+
+    document.getElementById('camera2').addEventListener('click', () => {
+      showOptions('Camera 2');
+    });
+
+    document.getElementById('home').addEventListener('click', () => {
+      location.reload();
+    });
+
+    document.getElementById('back').addEventListener('click', () => {
+      history.back();
+    });
+
+    function showOptions(camera) {
+      const content = `
+        <header>
+          <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
+          <button class="home-button" id="home">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
+          </button>
+        </header>
+        <main>
+          <h2>${camera}</h2>
           <button id="attendance">Attendance</button>
           <button id="attentiveness">Attentiveness</button>
-        `;
+        </main>
+        <button class="back-button" id="back">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
+        </button>
+      `;
+      updateContent(content, 'SMATR - ' + camera);
 
-        document.getElementById('attendance').addEventListener('click', () => {
-          fetchAttendanceData();
-        });
+      document.getElementById('attendance').addEventListener('click', () => {
+        fetchAttendanceData();
+      });
 
-        document.getElementById('attentiveness').addEventListener('click', () => {
-          showResult('Attentiveness', '40%');
-        });
-      }
+      document.getElementById('attentiveness').addEventListener('click', () => {
+        showResult('Attentiveness', '40%');
+      });
+    }
 
-      function showResult(option, result) {
-        document.body.innerHTML = `
-          <h1>${option}</h1>
+    function showResult(option, result) {
+      const content = `
+        <header>
+          <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
+          <button class="home-button" id="home">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
+          </button>
+        </header>
+        <main>
+          <h2>${option}</h2>
           <p>${result}</p>
+        </main>
+        <button class="back-button" id="back">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
+        </button>
+      `;
+      updateContent(content, 'SMATR - ' + option);
+    }
+
+    async function fetchAttendanceData() {
+      const data = await window.api.fetchAttendance();
+      if (data.error) {
+        const content = `
+          <header>
+            <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
+            <button class="home-button" id="home">
+              <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
+            </button>
+          </header>
+          <main>
+            <h2>Error</h2>
+            <p>${data.error}</p>
+          </main>
+          <button class="back-button" id="back">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
+          </button>
         `;
+        updateContent(content, 'SMATR - Error');
+        return;
       }
 
-      async function fetchAttendanceData() {
-        const data = await window.api.fetchAttendance();
-        if (data.error) {
-          document.body.innerHTML = `<h1>Error</h1><p>${data.error}</p>`;
-          return;
-        }
+      const tableRows = data.map(item => `
+        <tr>
+          <td>${item[1]}</td>
+          <td>${item[2]}</td>
+          <td>${item[3]}</td>
+        </tr>
+      `).join('');
 
-        const tableRows = data.map(item => `
-          <tr>
-            <td>${item[1]}</td>
-            <td>${item[2]}</td>
-            <td>${item[3]}</td>
-          </tr>
-        `).join('');
-
-        document.body.innerHTML = `
-          <h1>Attendance Records</h1>
+      const content = `
+        <header>
+          <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
+          <button class="home-button" id="home">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
+          </button>
+        </header>
+        <main>
+          <h2>Attendance Records</h2>
           <table>
             <thead>
               <tr>
@@ -163,8 +333,13 @@
               ${tableRows}
             </tbody>
           </table>
-        `;
-      }
-    </script>
-  </body>
+        </main>
+        <button class="back-button" id="back">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
+        </button>
+      `;
+      updateContent(content, 'SMATR - Attendance Records');
+    }
+  </script>
+</body>
 </html>
