@@ -2,38 +2,9 @@ import threading
 import face_recognition
 import cv2
 import os
-import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from PIL import Image
 import numpy as np
-from flask import Flask, request, jsonify, render_template
-import requests
-
-# Flask API Setup
-app = Flask(__name__)
-
-def db_connection():
-    conn = sqlite3.connect('attendance.db')
-    return conn
-
-@app.route('/attendance', methods=['GET'])
-def get_attendance():
-    conn = db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM attendance")
-    rows = cursor.fetchall()
-    conn.close()
-    return jsonify(rows)
-
-@app.route('/')
-def home():
-    response = requests.get('http://127.0.0.1:5000/attendance')  # Ensure this URL matches your Flask API
-    data = response.json()
-    return render_template('index.html', data=data)
-
-# Function to run the Flask app
-def run_flask_app():
-    app.run(debug=True, use_reloader=False)
 
 # Attendance Tracker Function
 def run_attendance_tracker():
@@ -71,43 +42,8 @@ def run_attendance_tracker():
     face_encodings = []
     face_names = []
 
-    # Create or connect to SQLite database
-    conn = sqlite3.connect('attendance.db')
-    cursor = conn.cursor()
-
-    # Create table if it doesn't exist
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS attendance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            date TEXT,
-            time TEXT
-        )
-    ''')
-
-    # Attendance interval
-    attendance_interval = timedelta(hours=1)
-
-    # Function to log attendance
-    def log_attendance(name):
-        if name == "Unknown":
-            return
-        
-        now = datetime.now()
-        date = now.strftime("%Y-%m-%d")
-        time = now.strftime("%H:%M:%S")
-
-        cursor.execute("SELECT MAX(date || ' ' || time) FROM attendance WHERE name=?", (name,))
-        last_attendance = cursor.fetchone()[0]
-
-        if last_attendance:
-            last_attendance_time = datetime.strptime(last_attendance, '%Y-%m-%d %H:%M:%S')
-            if now - last_attendance_time >= attendance_interval:
-                cursor.execute("INSERT INTO attendance (name, date, time) VALUES (?, ?, ?)", (name, date, time))
-                conn.commit()
-        else:
-            cursor.execute("INSERT INTO attendance (name, date, time) VALUES (?, ?, ?)", (name, date, time))
-            conn.commit()
+    # Confidence threshold
+    confidence_threshold = 0.5
 
     # Open a video file
     video_path = "/Users/shauryan/Documents/UWINDSOR/SEM 2/ADT/ADT Project/CnCAP/Attentiveness/video.mov"  # Change this to your video file path
@@ -130,7 +66,7 @@ def run_attendance_tracker():
         
         face_names = []
         for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.5)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=confidence_threshold)
             name = "Unknown"
             
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
@@ -139,21 +75,37 @@ def run_attendance_tracker():
                 name = known_face_names[best_match_index]
             
             face_names.append(name)
-            log_attendance(name)
 
+        # Print the results
+        # print(f"Faces recognized at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: {', '.join(face_names)}")
+
+        # Display the results
+        for (top, right, bottom, left), name in zip(face_locations, face_names):
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+
+            # Draw a box around the face
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+
+            # Draw a label with a name below the face
+            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 255, 0), cv2.FILLED)
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+
+        # Display the resulting frame
+        cv2.imshow('Video', frame)
+
+        # Hit 'q' on the keyboard to quit!
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Release handle to the webcam
+    print(face_names)
     video_capture.release()
     cv2.destroyAllWindows()
 
-    # Close the database connection
-    conn.close()
-
-# Main function to start all threads
+# Main function to start the attendance tracker
 if __name__ == '__main__':
-    flask_thread = threading.Thread(target=run_flask_app)
-    tracker_thread = threading.Thread(target=run_attendance_tracker)
-
-    flask_thread.start()
-    tracker_thread.start()
-
-    flask_thread.join()
-    tracker_thread.join()
+    run_attendance_tracker()

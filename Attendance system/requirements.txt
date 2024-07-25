@@ -3,4 +3,5 @@ requests
 opencv-python
 face-recognition
 Pillow
+mtcnn
 numpy==1.26.4
