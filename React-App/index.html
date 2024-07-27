@@ -67,95 +67,7 @@
 <html>
 <head>
   <title>SMATR</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-    body {
-      background: linear-gradient(to right, #4facfe, #00f2fe);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      text-align: center;
-    }
-    header {
-      width: 100%;
-      text-align: center;
-      padding: 10px 20px;
-      background-color: rgba(0, 0, 0, 0.2);
-      color: #ffeb3b;
-      position: relative;
-    }
-    .header-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin: 0;
-    }
-    .home-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      position: absolute;
-      top: 40px;
-      right: 20px;
-    }
-    .home-button img {
-      width: 30px;
-      height: 30px;
-    }
-    main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex-grow: 1;
-    }
-    button {
-      background-color: #ff6f61;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #ff4b4b;
-    }
-    table {
-      width: 80%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    th, td {
-      border: 1px solid #fff;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    .back-button {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .camera-icon {
-      width: 50px;
-      height: 50px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
@@ -165,14 +77,14 @@
     </button>
   </header>
   <main>
-    <h2>Select the Camera</h2>
-    <button id="camera1">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/camera--v1.png" class="camera-icon" alt="Camera 1"/>
-      Camera 1
+    <h2>Select the Class</h2>
+    <button id="class1">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/classroom.png" class="camera-icon" alt="Class 1"/>
+      Class 1
     </button>
-    <button id="camera2">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/camera--v1.png" class="camera-icon" alt="Camera 2"/>
-      Camera 2
+    <button id="class2">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/classroom.png" class="camera-icon" alt="Class 2"/>
+      Class 2
     </button>
   </main>
   <button class="back-button" id="back" style="display: none;">
@@ -210,21 +122,21 @@
         document.getElementById('home').addEventListener('click', () => {
           location.reload();
         });
-        document.getElementById('camera1').addEventListener('click', () => {
-          showOptions('Camera 1');
+        document.getElementById('class1').addEventListener('click', () => {
+          showOptions('Class 1');
         });
-        document.getElementById('camera2').addEventListener('click', () => {
-          showOptions('Camera 2');
+        document.getElementById('class2').addEventListener('click', () => {
+          showOptions('Class 2');
         });
       }
     });
 
-    document.getElementById('camera1').addEventListener('click', () => {
-      showOptions('Camera 1');
+    document.getElementById('class1').addEventListener('click', () => {
+      showOptions('Class 1');
     });
 
-    document.getElementById('camera2').addEventListener('click', () => {
-      showOptions('Camera 2');
+    document.getElementById('class2').addEventListener('click', () => {
+      showOptions('Class 2');
     });
 
     document.getElementById('home').addEventListener('click', () => {
@@ -235,7 +147,7 @@
       history.back();
     });
 
-    function showOptions(camera) {
+    function showOptions(className) {
       const content = `
         <header>
           <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
@@ -244,7 +156,7 @@
           </button>
         </header>
         <main>
-          <h2>${camera}</h2>
+          <h2>${className}</h2>
           <button id="attendance">Attendance</button>
           <button id="attentiveness">Attentiveness</button>
         </main>
@@ -252,7 +164,7 @@
           <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
         </button>
       `;
-      updateContent(content, 'SMATR - ' + camera);
+      updateContent(content, 'SMATR - ' + className);
 
       document.getElementById('attendance').addEventListener('click', () => {
         fetchAttendanceData();
@@ -338,8 +250,10 @@
           <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
         </button>
       `;
-      updateContent(content, 'SMATR - Attendance Records');
+      updateContent(content, 'SMATR - Attendance');
     }
   </script>
 </body>
 </html>
+
+
