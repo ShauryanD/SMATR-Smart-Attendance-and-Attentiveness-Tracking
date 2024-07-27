@@ -68,6 +68,7 @@
 <head>
   <title>SMATR</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
   <header>
@@ -91,6 +92,7 @@
     <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
   </button>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
     const initialContent = document.body.innerHTML;
 
@@ -157,6 +159,12 @@
         </header>
         <main>
           <h2>${className}</h2>
+          <div class="calendar">
+            <input type="text" id="datepicker" placeholder="Select Date">
+          </div>
+          <div class="class-timings">
+            <input type="text" id="timingpicker" placeholder="Select Class Timings">
+          </div>
           <button id="attendance">Attendance</button>
           <button id="attentiveness">Attentiveness</button>
         </main>
@@ -165,6 +173,17 @@
         </button>
       `;
       updateContent(content, 'SMATR - ' + className);
+
+      flatpickr("#datepicker", {
+        dateFormat: "Y-m-d",
+      });
+
+      flatpickr("#timingpicker", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+      });
 
       document.getElementById('attendance').addEventListener('click', () => {
         fetchAttendanceData();
@@ -233,6 +252,12 @@
         </header>
         <main>
           <h2>Attendance Records</h2>
+          <div class="calendar">
+            <input type="text" id="datepicker" placeholder="Select Date">
+          </div>
+          <div class="class-timings">
+            <input type="text" id="timingpicker" placeholder="Select Class Timings">
+          </div>
           <table>
             <thead>
               <tr>
@@ -251,9 +276,19 @@
         </button>
       `;
       updateContent(content, 'SMATR - Attendance');
+
+      flatpickr("#datepicker", {
+        dateFormat: "Y-m-d",
+      });
+
+      flatpickr("#timingpicker", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+      });
     }
   </script>
 </body>
 </html>
-
 
