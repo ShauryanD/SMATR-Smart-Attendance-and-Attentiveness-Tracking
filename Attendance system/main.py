@@ -110,7 +110,11 @@ def run_attendance_tracker():
             conn.commit()
 
     # Open a video file
+<<<<<<< HEAD
     video_path = "C:/Users/user/PycharmProjects/SMATR/SMATR-Smart-Attendance-and-Attentiveness-Tracking/Attendance system/video.mp4"  # Change this to your video file path
+=======
+    video_path = "/Users/shauryan/Documents/UWINDSOR/SEM 2/ADT/ADT Project/CnCAP/Attentiveness/video.mov"  # Change this to your video file path
+>>>>>>> d9fcebedaa9c97f784577eda27d06cfcc4a20699
     video_capture = cv2.VideoCapture(video_path)
 
     while video_capture.isOpened():
@@ -130,7 +134,7 @@ def run_attendance_tracker():
         
         face_names = []
         for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+            matches = face_recognition.compare_faces(known_face_encodings, face_encoding, tolerance=0.5)
             name = "Unknown"
             
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)

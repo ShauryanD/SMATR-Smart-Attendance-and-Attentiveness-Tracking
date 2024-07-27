@@ -3,5 +3,6 @@ cmake
 requests
 opencv-python
 Pillow
+mtcnn
 numpy==1.26.4
 face-recognition
