@@ -147,11 +147,11 @@ def get_data_points():
 
 @app.route('/')
 def home():
-    response = requests.get('http://127.0.0.1:5000/attentiveness')
+    response = requests.get('http://127.0.0.1:5001/attentiveness')
     data = response.json()
 
 if __name__ == '__main__':
     init_db()
     video_thread = threading.Thread(target=process_video, args=('v2.mp4', 0.93, 30))
     video_thread.start()
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True, use_reloader=False, port=5001)
