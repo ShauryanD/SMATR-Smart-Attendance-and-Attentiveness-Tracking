@@ -287,7 +287,7 @@ def run_attendance_tracker():
             conn.commit()
 
     # Open a video file
-    video_path = "/Users/shauryan/Documents/UWINDSOR/SEM 2/ADT/ADT Project/CnCAP/SMATR-Smart-Attendance-and-Attentiveness-Tracking/Attentiveness/video.mov"  # Change this to your video file path
+    video_path = "video.mov"  # Change this to your video file path
     video_capture = cv2.VideoCapture(video_path)
 
     while video_capture.isOpened():

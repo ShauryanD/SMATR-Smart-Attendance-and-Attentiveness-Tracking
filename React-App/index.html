@@ -183,7 +183,6 @@
             const tableRows = data.map(item => `
                 <tr>
                     <td>${item[0]}</td>
-                    <td>${item[1]}</td>
                 </tr>
             `).join('');
 
@@ -199,8 +198,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Class</th>
+                                <th>Student Name</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -239,68 +237,82 @@
 
             showResult('Attentiveness', data);
         }
+    function renderAttentivenessCharts(data) {
+    const ctx = document.getElementById('attentivenessChart').getContext('2d');
+    const pieCtx = document.getElementById('attentivenessPieChart').getContext('2d');
 
-        function renderAttentivenessCharts(data) {
-            const ctx = document.getElementById('attentivenessChart').getContext('2d');
-            const pieCtx = document.getElementById('attentivenessPieChart').getContext('2d');
+    const timestamps = data.map(item => parseFloat(item[0]).toFixed(2));
+    const attentivePercentage = data.map(item => item[1]);
 
-            const timestamps = data.map(item => parseFloat(item[0]).toFixed(2));
-            const attentiveCounts = data.map(item => item[2]);
-            const totalCounts = data.map(item => item[1]);
-            const attentivePercentage = attentiveCounts.map((count, index) => (count / totalCounts[index]) * 100);
+    const totalAttentivePercentage = attentivePercentage.reduce((acc, val) => acc + val, 0);
+    const averageAttentivePercentage = totalAttentivePercentage / attentivePercentage.length;
+    const averageNonAttentivePercentage = 100 - averageAttentivePercentage;
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: timestamps,
-                    datasets: [{
-                        label: 'Attentiveness Percentage',
-                        data: attentivePercentage,
-                        borderColor: 'rgb(255, 205, 86)',
-                        backgroundColor: 'rgba(255, 205, 86, 0.2)',
-                        fill: false,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Timestamp (s)'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Percentage (%)'
-                            }
-                        }
-                    }
-                }
-            });
-
-            const totalAttentive = attentiveCounts.reduce((sum, count) => sum + count, 0);
-            const totalNonAttentive = totalCounts.reduce((sum, count) => sum + count, 0) - totalAttentive;
-
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Attentive Faces', 'Non-Attentive Faces'],
-                    datasets: [{
-                        data: [totalAttentive, totalNonAttentive],
-                        backgroundColor: ['rgb(54, 162, 235)', 'rgb(255, 99, 132)']
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+    const isBelowThreshold = attentivePercentage.some(percentage => percentage < 30);
+    if (isBelowThreshold) 
+    {
+            alert("Warning: Attentiveness percentage dropped below 30%!");
         }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: 'Attentiveness Percentage',
+                data: attentivePercentage,
+                borderColor: 'rgb(255, 205, 86)',
+                backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp(s)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Percentage'
+                    }
+                }
+            }
+        }
+    });
+
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Average Attentiveness during class', 'Average Non-Attentiveness during class'],
+            datasets: [{
+                data: [averageAttentivePercentage, averageNonAttentivePercentage],
+                backgroundColor: ['rgb(54, 162, 235)', 'rgb(255, 99, 132)']
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            return label + ': ' + value.toFixed(2) + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+}
 
         attachEventListeners();
     </script>

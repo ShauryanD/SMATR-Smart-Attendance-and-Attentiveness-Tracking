@@ -1,3 +1,4 @@
+import os
 import cv2
 from facenet_pytorch import MTCNN
 from flask import Flask, jsonify, request, render_template
@@ -5,6 +6,7 @@ import threading
 import time
 import math
 import sqlite3
+import requests
 
 app = Flask(__name__)
 
@@ -22,20 +24,21 @@ def init_db():
             date TEXT,
             faces_count INTEGER,
             attentive_count INTEGER,
-            attentive_percentage REAL
+            attentive_percentage REAL,
+            average_attentive_percentage REAL
         )
     ''')
     conn.commit()
     conn.close()
 
 # Insert data into the SQLite database
-def insert_data(timestamp, date, faces_count, attentive_count, attentive_percentage):
+def insert_data(timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage):
     conn = sqlite3.connect('attentiveness.db')
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO attentiveness (timestamp, date, faces_count, attentive_count, attentive_percentage)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (timestamp, date, faces_count, attentive_count, attentive_percentage))
+        INSERT INTO attentiveness (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage))
     conn.commit()
     conn.close()
 
@@ -93,6 +96,9 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
         fps = 30
 
     frame_count = 0
+    total_attentive_percentage = 0
+    total_frames = 0
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -107,40 +113,45 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
                 facesCount = len(resultList)
                 attentiveCount = len([i for i in resultList if i == 'Attentive'])
                 attentivePercentage = (attentiveCount / facesCount) * 100 if facesCount > 0 else 0
-                insert_data(timestamp, date, facesCount, attentiveCount, attentivePercentage)
+                total_attentive_percentage += attentivePercentage
+                total_frames += 1
+                average_attentive_percentage = total_attentive_percentage / total_frames if total_frames > 0 else 0
+                insert_data(timestamp, date, facesCount, attentiveCount, attentivePercentage, average_attentive_percentage)
                 data_points.append({
                     "timestamp": timestamp,
-                    "faces_count": facesCount,
-                    "attentive_count": attentiveCount
+                    "attentive_percentage": attentivePercentage,
+                    "average_attentive_percentage": average_attentive_percentage
                 })
                 print(f"Timestamp: {timestamp:.2f} seconds")
                 print(f"Number of detected faces = {facesCount}")
                 print(f"Number of attentive faces = {attentiveCount}")
+                print(f"Average Attentive Percentage = {average_attentive_percentage:.2f}%")
 
         frame_count += 1
 
     cap.release()
     cv2.destroyAllWindows()
 
-@app.route('/data_points', methods=['GET'])
+@app.route('/attentiveness', methods=['GET'])
 def get_data_points():
     date = request.args.get('date')
     conn = sqlite3.connect('attentiveness.db')
     cursor = conn.cursor()
     if date:
-        cursor.execute("SELECT timestamp, faces_count, attentive_count FROM attentiveness WHERE date = ?", (date,))
+        cursor.execute("SELECT timestamp, attentive_percentage, average_attentive_percentage FROM attentiveness WHERE date = ?", (date,))
     else:
-        cursor.execute("SELECT timestamp, faces_count, attentive_count FROM attentiveness")
+        cursor.execute("SELECT timestamp, attentive_percentage, average_attentive_percentage FROM attentiveness")
     rows = cursor.fetchall()
     conn.close()
     return jsonify(rows)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    response = requests.get('http://127.0.0.1:5000/attentiveness')
+    data = response.json()
 
 if __name__ == '__main__':
     init_db()
-    video_thread = threading.Thread(target=process_video, args=('video.mov', 0.93, 30))
+    video_thread = threading.Thread(target=process_video, args=('v2.mp4', 0.93, 30))
     video_thread.start()
-    app.run(debug=True, use_reloader=False, port=5001)
+    app.run(debug=True, use_reloader=False)

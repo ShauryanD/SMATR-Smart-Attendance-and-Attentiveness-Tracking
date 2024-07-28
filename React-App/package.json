@@ -12,8 +12,8 @@
   "devDependencies": {
     "electron": "^31.3.0"
   },
-  "description": "",
   "dependencies": {
     "axios": "^1.7.2"
-  }
+  },
+  "description": ""
 }

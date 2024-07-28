@@ -1,0 +1,78 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attentiveness Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .chart-container {
+            width: 80%;
+            max-width: 800px;
+        }
+        h1 {
+            color: #4caf50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attentiveness Chart</h1>
+    <div class="chart-container">
+        <canvas id="attentivenessChart"></canvas>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const data = JSON.parse('{{ data | tojson | safe }}');
+            console.log("Data received from server:");
+            data.forEach(item => {
+                console.log("Timestamp:", item[0], "Attentive Percentage:", item[1]);
+            });
+
+            const timestamps = data.map(item => parseFloat(item[0]).toFixed(2));
+            const attentivePercentage = data.map(item => item[1]);
+
+            const ctx = document.getElementById('attentivenessChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            label: 'Attentiveness Percentage',
+                            data: attentivePercentage,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom'
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html> -->
