@@ -1,288 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMATR</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <header>
-        <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-        <button class="home-button" id="home">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-        </button>
-    </header>
-    <main>
-        <h2>Select the Class</h2>
-        <button id="class1">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/classroom.png" class="camera-icon" alt="Class 1"/>
-            Class 1
-        </button>
-        <button id="class2">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/classroom.png" class="camera-icon" alt="Class 2"/>
-            Class 2
-        </button>
-    </main>
-    <button class="back-button" id="back" style="display: none;">
-        <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-    </button>
-
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
-        const initialContent = document.body.innerHTML;
-
-        function updateContent(content, title) {
-            document.body.innerHTML = content;
-            document.title = title;
-            attachEventListeners();
-            window.history.pushState({ content: content, title: title }, title);
-        }
-
-        window.addEventListener('popstate', (event) => {
-            if (event.state) {
-                document.body.innerHTML = event.state.content;
-                document.title = event.state.title;
-                attachEventListeners();
-            } else {
-                document.body.innerHTML = initialContent;
-                document.title = 'SMATR';
-                attachEventListeners();
-            }
-        });
-
-        function attachEventListeners() {
-            if (document.getElementById('class1')) {
-                document.getElementById('class1').addEventListener('click', () => {
-                    showOptions('Class 1');
-                });
-            }
-
-            if (document.getElementById('class2')) {
-                document.getElementById('class2').addEventListener('click', () => {
-                    showOptions('Class 2');
-                });
-            }
-
-            if (document.getElementById('home')) {
-                document.getElementById('home').addEventListener('click', () => {
-                    location.reload();
-                });
-            }
-
-            if (document.getElementById('back')) {
-                document.getElementById('back').addEventListener('click', () => {
-                    history.back();
-                });
-            }
-
-            if (document.getElementById('attendance')) {
-                document.getElementById('attendance').addEventListener('click', () => {
-                    const date = document.getElementById('datepicker').value;
-                    if (date) {
-                        fetchAttendanceData(date);
-                    } else {
-                        alert("Please select a date.");
-                    }
-                });
-            }
-
-            if (document.getElementById('attentiveness')) {
-                document.getElementById('attentiveness').addEventListener('click', () => {
-                    fetchAttentivenessData();
-                });
-            }
-
-            if (document.getElementById('datepicker')) {
-                flatpickr("#datepicker", {
-                    dateFormat: "Y-m-d",
-                });
-            }
-
-            if (document.getElementById('timingpicker')) {
-                flatpickr("#timingpicker", {
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    time_24hr: true,
-                });
-            }
-        }
-
-        function showOptions(className) {
-            const content = `
-                <header>
-                    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                    <button class="home-button" id="home">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                    </button>
-                </header>
-                <main>
-                    <h2>${className}</h2>
-                    <div class="calendar">
-                        <input type="text" id="datepicker" placeholder="Select Date">
-                    </div>
-                    <div class="class-timings">
-                        <input type="text" id="timingpicker" placeholder="Select Class Timings">
-                    </div>
-                    <button id="attendance">Attendance</button>
-                    <button id="attentiveness">Attentiveness</button>
-                </main>
-                <button class="back-button" id="back">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                </button>
-            `;
-            updateContent(content, 'SMATR - ' + className);
-        }
-
-        function showResult(option, result) {
-            const content = `
-                <header>
-                    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                    <button class="home-button" id="home">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                    </button>
-                </header>
-                <main>
-                    <h2>${option}</h2>
-                    <p>${result}</p>
-                </main>
-                <button class="back-button" id="back">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                </button>
-            `;
-            updateContent(content, 'SMATR - ' + option);
-        }
-
-        async function fetchAttendanceData(date) {
-            const data = await window.api.fetchAttendance(date);
-            if (data.error) {
-                const content = `
-                    <header>
-                        <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                        <button class="home-button" id="home">
-                            <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                        </button>
-                    </header>
-                    <main>
-                        <h2>Error</h2>
-                        <p>${data.error}</p>
-                    </main>
-                    <button class="back-button" id="back">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                    </button>
-                `;
-                updateContent(content, 'SMATR - Error');
-                return;
-            }
-
-            const tableRows = data.map(item => `
-                <tr>
-                    <td>${item[0]}</td>
-                    <td>${item[1]}</td>
-                </tr>
-            `).join('');
-
-            const content = `
-                <header>
-                    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                    <button class="home-button" id="home">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                    </button>
-                </header>
-                <main>
-                    <h2>Attendance Records</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Class</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                </main>
-                <button class="back-button" id="back">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                </button>
-            `;
-            updateContent(content, 'SMATR - Attendance');
-        }
-
-        async function fetchAttentivenessData() {
-            const response = await window.api.fetchAttentiveness();
-            const data = response;
-
-            const timestamps = data.map(item => item.timestamp.toFixed(2));
-            const facesCounts = data.map(item => item.faces_count);
-            const attentiveCounts = data.map(item => item.attentive_count);
-
-            const content = `
-                <header>
-                    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                    <button class="home-button" id="home">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                    </button>
-                </header>
-                <main>
-                    <h2>Attentiveness Records</h2>
-                    <div class="chart-container">
-                        <canvas id="attentivenessChart"></canvas>
-                    </div>
-                </main>
-                <button class="back-button" id="back">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                </button>
-            `;
-            updateContent(content, 'SMATR - Attentiveness');
-
-            const ctx = document.getElementById('attentivenessChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: timestamps,
-                    datasets: [
-                        {
-                            label: 'Number of Detected Faces',
-                            data: facesCounts,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1,
-                            fill: false
-                        },
-                        {
-                            label: 'Number of Attentive Faces',
-                            data: attentiveCounts,
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            borderWidth: 1,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            position: 'bottom'
-                        },
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        attachEventListeners();
-    </script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -291,7 +6,6 @@
     <title>SMATR</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.css">
 </head>
 <body>
     <header>
@@ -391,15 +105,6 @@
                     dateFormat: "Y-m-d",
                 });
             }
-
-            if (document.getElementById('timingpicker')) {
-                flatpickr("#timingpicker", {
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    time_24hr: true,
-                });
-            }
         }
 
         function showOptions(className) {
@@ -415,9 +120,6 @@
                     <div class="calendar">
                         <input type="text" id="datepicker" placeholder="Select Date">
                     </div>
-                    <div class="class-timings">
-                        <input type="text" id="timingpicker" placeholder="Select Class Timings">
-                    </div>
                     <button id="attendance">Attendance</button>
                     <button id="attentiveness">Attentiveness</button>
                 </main>
@@ -428,7 +130,16 @@
             updateContent(content, 'SMATR - ' + className);
         }
 
-        function showResult(option, result) {
+        function showResult(option, data) {
+            let chartContent = '';
+            if (option === 'Attentiveness') {
+                chartContent = `
+                    <canvas id="attentivenessChart"></canvas>
+                    <canvas id="attentivenessPieChart"></canvas>
+                `;
+                setTimeout(() => renderAttentivenessCharts(data), 0);
+            }
+
             const content = `
                 <header>
                     <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
@@ -437,8 +148,8 @@
                     </button>
                 </header>
                 <main>
-                    <h2>${option}</h2>
-                    <p>${result}</p>
+                    <h2>${option} Records</h2>
+                    ${chartContent}
                 </main>
                 <button class="back-button" id="back">
                     <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
@@ -526,55 +237,65 @@
                 return;
             }
 
-            const timestamps = data.map(point => point.timestamp);
-            const facesCount = data.map(point => point.faces_count);
-            const attentiveCount = data.map(point => point.attentive_count);
+            showResult('Attentiveness', data);
+        }
 
-            const content = `
-                <header>
-                    <div class="header-title">SMATR: Smart Attendance and Attentiveness Tracking</div>
-                    <button class="home-button" id="home">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home"/>
-                    </button>
-                </header>
-                <main>
-                    <h2>Attentiveness Records</h2>
-                    <canvas id="attentivenessChart" width="800" height="400"></canvas>
-                </main>
-                <button class="back-button" id="back">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
-                </button>
-            `;
-            updateContent(content, 'SMATR - Attentiveness');
-
+        function renderAttentivenessCharts(data) {
             const ctx = document.getElementById('attentivenessChart').getContext('2d');
+            const pieCtx = document.getElementById('attentivenessPieChart').getContext('2d');
+
+            const timestamps = data.map(item => parseFloat(item[0]).toFixed(2));
+            const attentiveCounts = data.map(item => item[2]);
+            const totalCounts = data.map(item => item[1]);
+            const attentivePercentage = attentiveCounts.map((count, index) => (count / totalCounts[index]) * 100);
+
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: timestamps,
                     datasets: [{
-                        label: 'Number of Detected Faces',
-                        data: facesCount,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        fill: false
-                    }, {
-                        label: 'Number of Attentive Faces',
-                        data: attentiveCount,
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        borderWidth: 2,
-                        fill: false
+                        label: 'Attentiveness Percentage',
+                        data: attentivePercentage,
+                        borderColor: 'rgb(255, 205, 86)',
+                        backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                        fill: false,
+                        tension: 0.1
                     }]
                 },
                 options: {
-                    responsive: true,
                     scales: {
                         x: {
-                            type: 'linear',
-                            position: 'bottom'
+                            title: {
+                                display: true,
+                                text: 'Timestamp (s)'
+                            }
                         },
                         y: {
-                            beginAtZero: true
+                            title: {
+                                display: true,
+                                text: 'Percentage (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const totalAttentive = attentiveCounts.reduce((sum, count) => sum + count, 0);
+            const totalNonAttentive = totalCounts.reduce((sum, count) => sum + count, 0) - totalAttentive;
+
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Attentive Faces', 'Non-Attentive Faces'],
+                    datasets: [{
+                        data: [totalAttentive, totalNonAttentive],
+                        backgroundColor: ['rgb(54, 162, 235)', 'rgb(255, 99, 132)']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
                 }

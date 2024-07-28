@@ -1,11 +1,10 @@
 import cv2
 from facenet_pytorch import MTCNN
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, request, render_template
 import threading
 import time
 import math
 import sqlite3
-from datetime import datetime
 
 app = Flask(__name__)
 
@@ -20,6 +19,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS attentiveness (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
+            date TEXT,
             faces_count INTEGER,
             attentive_count INTEGER,
             attentive_percentage REAL
@@ -29,13 +29,13 @@ def init_db():
     conn.close()
 
 # Insert data into the SQLite database
-def insert_data(timestamp, faces_count, attentive_count, attentive_percentage):
+def insert_data(timestamp, date, faces_count, attentive_count, attentive_percentage):
     conn = sqlite3.connect('attentiveness.db')
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO attentiveness (timestamp, faces_count, attentive_count, attentive_percentage)
-        VALUES (?, ?, ?, ?)
-    ''', (timestamp, faces_count, attentive_count, attentive_percentage))
+        INSERT INTO attentiveness (timestamp, date, faces_count, attentive_count, attentive_percentage)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (timestamp, date, faces_count, attentive_count, attentive_percentage))
     conn.commit()
     conn.close()
 
@@ -98,6 +98,7 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
         if not ret:
             break
         timestamp = frame_count / fps
+        date = time.strftime('%Y-%m-%d', time.localtime())
 
         if frame_count % nth_frame == 0:
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -106,17 +107,15 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
                 facesCount = len(resultList)
                 attentiveCount = len([i for i in resultList if i == 'Attentive'])
                 attentivePercentage = (attentiveCount / facesCount) * 100 if facesCount > 0 else 0
+                insert_data(timestamp, date, facesCount, attentiveCount, attentivePercentage)
                 data_points.append({
                     "timestamp": timestamp,
                     "faces_count": facesCount,
-                    "attentive_count": attentiveCount,
-                    "attentive_percentage": attentivePercentage
+                    "attentive_count": attentiveCount
                 })
-                insert_data(timestamp, facesCount, attentiveCount, attentivePercentage)
                 print(f"Timestamp: {timestamp:.2f} seconds")
                 print(f"Number of detected faces = {facesCount}")
                 print(f"Number of attentive faces = {attentiveCount}")
-                print(f"Attentive percentage = {attentivePercentage:.2f}%")
 
         frame_count += 1
 
@@ -125,7 +124,16 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
 
 @app.route('/data_points', methods=['GET'])
 def get_data_points():
-    return jsonify(data_points)
+    date = request.args.get('date')
+    conn = sqlite3.connect('attentiveness.db')
+    cursor = conn.cursor()
+    if date:
+        cursor.execute("SELECT timestamp, faces_count, attentive_count FROM attentiveness WHERE date = ?", (date,))
+    else:
+        cursor.execute("SELECT timestamp, faces_count, attentive_count FROM attentiveness")
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify(rows)
 
 @app.route('/')
 def home():
