@@ -169,8 +169,8 @@
                         </button>
                     </header>
                     <main>
-                        <h2>Error</h2>
-                        <p>${data.error}</p>
+                        <h2>No Records Found</h2>
+                        <p>No class records found on this date</p>
                     </main>
                     <button class="back-button" id="back">
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
@@ -224,8 +224,8 @@
                         </button>
                     </header>
                     <main>
-                        <h2>Error</h2>
-                        <p>${data.error}</p>
+                        <h2>No Records Found</h2>
+                        <p>No class records found on this date</p>
                     </main>
                     <button class="back-button" id="back">
                         <img src="https://img.icons8.com/ios-filled/50/ffffff/back.png" class="camera-icon" alt="Back"/>
@@ -249,8 +249,7 @@
     const averageNonAttentivePercentage = 100 - averageAttentivePercentage;
 
     const isBelowThreshold = attentivePercentage.some(percentage => percentage < 30);
-    if (isBelowThreshold) 
-    {
+    if (isBelowThreshold) {
             alert("Warning: Attentiveness percentage dropped below 30%!");
         }
 
