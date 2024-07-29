@@ -316,7 +316,7 @@ def run_attendance_tracker():
                 name = known_face_names[best_match_index]
             
             face_names.append(name)
-            log_attendance(name, "Class 1")  # Assuming "Class 1", update this as necessary
+            log_attendance(name, "Class 2")  # Assuming "Class 1", update this as necessary
 
     video_capture.release()
     cv2.destroyAllWindows()

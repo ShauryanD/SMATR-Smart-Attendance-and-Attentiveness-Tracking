@@ -25,20 +25,21 @@ def init_db():
             faces_count INTEGER,
             attentive_count INTEGER,
             attentive_percentage REAL,
-            average_attentive_percentage REAL
+            average_attentive_percentage REAL,
+            class TEXT
         )
     ''')
     conn.commit()
     conn.close()
 
 # Insert data into the SQLite database
-def insert_data(timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage):
+def insert_data(timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage, class_value):
     conn = sqlite3.connect('attentiveness.db')
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO attentiveness (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage))
+        INSERT INTO attentiveness (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage, class)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (timestamp, date, faces_count, attentive_count, attentive_percentage, average_attentive_percentage, class_value))
     conn.commit()
     conn.close()
 
@@ -87,7 +88,7 @@ def predFacePose(frame, mtcnnConfidence=0.9):
 
     return humanBBox, resultList
 
-def process_video(video_path, mtcnnConfidence, nth_frame):
+def process_video(video_path, mtcnnConfidence, nth_frame, class_value):
     cap = cv2.VideoCapture(video_path)
     print(f"Video processing started at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
 
@@ -116,11 +117,12 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
                 total_attentive_percentage += attentivePercentage
                 total_frames += 1
                 average_attentive_percentage = total_attentive_percentage / total_frames if total_frames > 0 else 0
-                insert_data(timestamp, date, facesCount, attentiveCount, attentivePercentage, average_attentive_percentage)
+                insert_data(timestamp, date, facesCount, attentiveCount, attentivePercentage, average_attentive_percentage, class_value)
                 data_points.append({
                     "timestamp": timestamp,
                     "attentive_percentage": attentivePercentage,
-                    "average_attentive_percentage": average_attentive_percentage
+                    "average_attentive_percentage": average_attentive_percentage,
+                    "class": class_value
                 })
                 print(f"Timestamp: {timestamp:.2f} seconds")
                 print(f"Number of detected faces = {facesCount}")
@@ -132,26 +134,62 @@ def process_video(video_path, mtcnnConfidence, nth_frame):
     cap.release()
     cv2.destroyAllWindows()
 
+@app.route('/attendance', methods=['GET'])
+def get_attendance():
+    date = request.args.get('date')
+    class_name = request.args.get('class')
+    
+    query = "SELECT name, class, date FROM attendance WHERE 1=1"
+    params = []
+    
+    if date:
+        query += " AND date = ?"
+        params.append(date)
+        
+    if class_name:
+        query += " AND class = ?"
+        params.append(class_name)
+        
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    return jsonify(rows)
+
 @app.route('/attentiveness', methods=['GET'])
 def get_data_points():
     date = request.args.get('date')
+    class_name = request.args.get('class')
+    
+    query = "SELECT timestamp, attentive_percentage, average_attentive_percentage FROM attentiveness WHERE 1=1"
+    params = []
+    
+    if date:
+        query += " AND date = ?"
+        params.append(date)
+        
+    if class_name:
+        query += " AND class = ?"
+        params.append(class_name)
+        
     conn = sqlite3.connect('attentiveness.db')
     cursor = conn.cursor()
-    if date:
-        cursor.execute("SELECT timestamp, attentive_percentage, average_attentive_percentage FROM attentiveness WHERE date = ?", (date,))
-    else:
-        cursor.execute("SELECT timestamp, attentive_percentage, average_attentive_percentage FROM attentiveness")
+    cursor.execute(query, params)
     rows = cursor.fetchall()
     conn.close()
+    
     return jsonify(rows)
 
 @app.route('/')
 def home():
     response = requests.get('http://127.0.0.1:5001/attentiveness')
     data = response.json()
+    return render_template('index.html', data=data)
 
 if __name__ == '__main__':
     init_db()
-    video_thread = threading.Thread(target=process_video, args=('v2.mp4', 0.93, 30))
+    video_thread = threading.Thread(target=process_video, args=('v2.mp4', 0.93, 30, 'Class 2'))
     video_thread.start()
     app.run(debug=True, use_reloader=False, port=5001)
